@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: nepali-pdf-to-excel
+    name: pdf-excel-streamlit
     env: python
     buildCommand: |
       apt-get update && apt-get install -y poppler-utils tesseract-ocr
