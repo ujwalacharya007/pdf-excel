@@ -3,6 +3,6 @@ services:
     name: pdf-to-excel-converter
     env: python
     buildCommand: |
-      apt-get update && apt-get install -y poppler-utils
+      apt-get update && apt-get install -y poppler-utils tesseract-ocr
       pip install -r requirements.txt
     startCommand: streamlit run pdftoexcel-interface.py --        server.port=$PORT
