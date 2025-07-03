@@ -6,12 +6,12 @@ from pdf2image import convert_from_bytes
 import re
 import pandas as pd
 import io
-# import platform
+import platform
 
-# Configure Tesseract path (for Windows - optional on Render)
-# Comment this line out when deploying to Render or Streamlit Cloud
-# if platform.system == "Windows":
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Admin\Tesseract-OCR\Tesseract-OCR\tesseract.exe'
+# Use this ONLY for local Windows testing
+if platform.system() == "Windows":
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Admin\Tesseract-OCR\Tesseract-OCR\tesseract.exe'
+
 
 st.set_page_config(page_title="Nepali PDF to Excel Converter", page_icon="📄")
 st.title("📄 Nepali PDF to Excel Converter with OCR and Data Extraction")
