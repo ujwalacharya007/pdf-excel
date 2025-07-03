@@ -1,5 +1,5 @@
 import streamlit as st
-import cv2
+from PIL import Image
 import numpy as np
 import pytesseract
 from pdf2image import convert_from_bytes
@@ -7,7 +7,8 @@ import re
 import pandas as pd
 import io
 
-# Configure Tesseract path (for Windows)
+# Configure Tesseract path (for Windows - optional on Render)
+# Comment this line out when deploying to Render or Streamlit Cloud
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Admin\Tesseract-OCR\Tesseract-OCR\tesseract.exe'
 
 st.set_page_config(page_title="Nepali PDF to Excel Converter", page_icon="📄")
@@ -32,19 +33,19 @@ if uploaded_file:
             progress_bar.progress(progress)
             status_text.markdown(f"🔍 **Processing Page {i + 1} of {num_pages}**...")
 
-            img_np = np.array(image)
-            gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
-            _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+            # Convert to grayscale and binarize using PIL (no OpenCV)
+            gray_image = image.convert("L")  # L mode = grayscale
+            binary_image = gray_image.point(lambda x: 0 if x < 200 else 255, '1')  # Binarize
 
-            text = pytesseract.image_to_string(thresh, lang='nep')
+            text = pytesseract.image_to_string(binary_image, lang='nep')
             all_text += f"Page {i + 1}:\n{text}\n\n"
 
-            # Show live preview (shortened)
+            # Show OCR preview
             st.text_area(f"📝 OCR Preview (Page {i + 1})", value=text[:500], height=100, key=f"preview_{i}", disabled=True)
 
         st.success("✅ OCR completed. Extracting structured data...")
 
-        # Regex: नाम, उमेर, लिङ्ग, जाति
+        # Regex for: नाम, उमेर, लिङ्ग, जाति
         pattern = re.compile(r'([^\d\.\n]+?)\s+(\d+)\s+वर्ष\s+/\s+(पुरुष|महिला)\s+([^\n]+)')
         matches = re.findall(pattern, all_text)
 
@@ -55,7 +56,7 @@ if uploaded_file:
                 'नाम': [match[0].strip() for match in matches],
                 'उमेर': [int(match[1]) for match in matches],
                 'लिङ्ग': [match[2] for match in matches],
-                'जाति': [match[0].strip().split()[-1] for match in matches]
+                'जाति': [match[0].strip().split()[-1] for match in matches]  # Approximation of caste
             }
 
             df = pd.DataFrame(data)
